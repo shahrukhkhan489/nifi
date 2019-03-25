@@ -160,6 +160,7 @@ public class PutHDFS extends AbstractHadoopProcessor {
                  "If the cluster is running in Secure Mode, the superuser must have kerberos credentials to be able to impersonate another user." +
                  "https://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-common/Superusers.html")
             .required(false)
+            .setValidateExpressionUsage(false)
             .build();
 
     public static final PropertyDescriptor REMOTE_OWNER = new PropertyDescriptor.Builder()
