@@ -159,6 +159,7 @@ public class PutHDFS extends AbstractHadoopProcessor {
             .description("A superuser with username ‘super’ wants to submit job and access hdfs on behalf of another user joe." +
                  "If the cluster is running in Secure Mode, the superuser must have kerberos credentials to be able to impersonate another user." +
                  "https://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-common/Superusers.html")
+            .addValidator(StandardValidators.NON_EMPTY_VALIDATOR)
             .required(false)
             .build();
 
