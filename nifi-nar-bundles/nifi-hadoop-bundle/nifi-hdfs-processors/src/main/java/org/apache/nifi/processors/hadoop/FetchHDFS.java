@@ -86,7 +86,6 @@ public class FetchHDFS extends AbstractHadoopProcessor {
              "If the cluster is running in Secure Mode, the superuser must have kerberos credentials to be able to impersonate another user." +
              "https://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-common/Superusers.html")
         .required(false)
-        .setValidateExpressionUsage(false)
         .build();  
     
     static final Relationship REL_SUCCESS = new Relationship.Builder()
@@ -133,7 +132,7 @@ public class FetchHDFS extends AbstractHadoopProcessor {
         final String filenameValue = context.getProperty(FILENAME).evaluateAttributeExpressions(flowFile).getValue();
 
         UserGroupInformation ugi = null;
-        String Proxy_User = context.getProperty(PROXY_USER).evaluateAttributeExpressions(flowFile).getValue();
+        String Proxy_User = context.getProperty(PROXY_USER).getValue();
         if ( Proxy_User == null || Proxy_User.trim().equals("") )
         	ugi = getUserGroupInformation();
 //        else
