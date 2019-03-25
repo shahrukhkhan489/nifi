@@ -223,9 +223,9 @@ public class PutHDFS extends AbstractHadoopProcessor {
         }
         
         if ( context.getProperty(PROXY_USER).evaluateAttributeExpressions(flowFile).getValue() == null || context.getProperty(PROXY_USER).evaluateAttributeExpressions(flowFile).getValue().trim().equals("") )
-        	final UserGroupInformation ugi = getUserGroupInformation();
+        	UserGroupInformation ugi = getUserGroupInformation();
         else
-        	final UserGroupInformation ugi = UserGroupInformation.createProxyUser(context.getProperty(PROXY_USER).evaluateAttributeExpressions(flowFile).getValue(), UserGroupInformation.getLoginUser());
+        	UserGroupInformation ugi = UserGroupInformation.createProxyUser(context.getProperty(PROXY_USER).evaluateAttributeExpressions(flowFile).getValue(), UserGroupInformation.getLoginUser());
 
         final FileSystem hdfs = getFileSystem();
         final Configuration configuration = getConfiguration();
