@@ -239,7 +239,7 @@ public class PutHDFS extends AbstractHadoopProcessor {
         if ( Proxy_User == null || Proxy_User.trim().equals("") )
         	ugi = getUserGroupInformation();
         else
-        	ugi = UserGroupInformation.createProxyUser(Proxy_User, getUserGroupInformation().getLoginUser());
+        	ugi = UserGroupInformation.createProxyUser(Proxy_User, getUserGroupInformation());
 //        	ugi = UserGroupInformation.createProxyUser(Proxy_User, UserGroupInformation.getLoginUser());
 
         if (configuration == null || hdfs == null || ugi == null) {
