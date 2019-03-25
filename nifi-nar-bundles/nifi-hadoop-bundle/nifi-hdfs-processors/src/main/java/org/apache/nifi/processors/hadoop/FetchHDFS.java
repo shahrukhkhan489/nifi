@@ -118,9 +118,14 @@ public class FetchHDFS extends AbstractHadoopProcessor {
         if ( flowFile == null ) {
             return;
         }
+        
+        String Proxy_User = context.getProperty(PROXY_USER).evaluateAttributeExpressions(flowFile).getValue();
+        if ( Proxy_User == null || Proxy_User.trim().equals("") )
+        	final UserGroupInformation ugi = getUserGroupInformation();
+        else
+        	final UserGroupInformation ugi = UserGroupInformation.createProxyUser(Proxy_User, UserGroupInformation.getLoginUser());
 
-        final FileSystem hdfs = getFileSystem();
-        final UserGroupInformation ugi = getUserGroupInformation();
+        final FileSystem hdfs = getFileSystem();     
         final String filenameValue = context.getProperty(FILENAME).evaluateAttributeExpressions(flowFile).getValue();
 
         final Path path;
