@@ -119,6 +119,16 @@ public abstract class AbstractHadoopProcessor extends AbstractProcessor {
             .dynamicallyModifiesClasspath(true)
             .build();
 
+    public static final PropertyDescriptor PROXY_USER = new PropertyDescriptor.Builder()
+            .name("Proxy User")
+            .description("A superuser with username ‘super’ wants to submit job and access hdfs on behalf of another user joe." +
+                    "If the cluster is running in Secure Mode, the superuser must have kerberos credentials to be able to impersonate another user." +
+                    "https://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-common/Superusers.html")
+            .required(false)
+            .addValidator(StandardValidators.NON_EMPTY_VALIDATOR)
+            .dynamicallyModifiesClasspath(true)
+            .build(); 
+    
     static final PropertyDescriptor KERBEROS_CREDENTIALS_SERVICE = new PropertyDescriptor.Builder()
             .name("kerberos-credentials-service")
             .displayName("Kerberos Credentials Service")
@@ -156,6 +166,7 @@ public abstract class AbstractHadoopProcessor extends AbstractProcessor {
         props.add(kerberosProperties.getKerberosKeytab());
         props.add(KERBEROS_RELOGIN_PERIOD);
         props.add(ADDITIONAL_CLASSPATH_RESOURCES);
+        props.add(PROXY_USER);
         properties = Collections.unmodifiableList(props);
     }
 
