@@ -160,8 +160,6 @@ public class PutHDFS extends AbstractHadoopProcessor {
                  "If the cluster is running in Secure Mode, the superuser must have kerberos credentials to be able to impersonate another user." +
                  "https://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-common/Superusers.html")
             .required(false)
-            .addValidator(StandardValidators.NON_EMPTY_VALIDATOR)
-            .dynamicallyModifiesClasspath(true)
             .build();
 
     public static final PropertyDescriptor REMOTE_OWNER = new PropertyDescriptor.Builder()
@@ -241,7 +239,7 @@ public class PutHDFS extends AbstractHadoopProcessor {
         if ( Proxy_User == null || Proxy_User.trim().equals("") )
         	ugi = getUserGroupInformation();
 //        else
-//        	ugi = UserGroupInformation.createProxyUser(Proxy_User, getUserGroupInformation());
+//        	ugi = UserGroupInformation.createProxyUser(Proxy_User, UserGroupInformation.getLoginUser());
 
         if (configuration == null || hdfs == null || ugi == null) {
             getLogger().error("HDFS not configured properly");

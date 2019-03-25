@@ -86,8 +86,6 @@ public class FetchHDFS extends AbstractHadoopProcessor {
              "If the cluster is running in Secure Mode, the superuser must have kerberos credentials to be able to impersonate another user." +
              "https://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-common/Superusers.html")
         .required(false)
-        .addValidator(StandardValidators.NON_EMPTY_VALIDATOR)
-        .dynamicallyModifiesClasspath(true)
         .build();  
     
     static final Relationship REL_SUCCESS = new Relationship.Builder()
