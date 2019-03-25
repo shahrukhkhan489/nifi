@@ -137,7 +137,7 @@ public class FetchHDFS extends AbstractHadoopProcessor {
         if ( Proxy_User == null || Proxy_User.trim().equals("") )
         	ugi = getUserGroupInformation();
         else
-        	ugi = UserGroupInformation.createProxyUser(Proxy_User, getUserGroupInformation());
+        	ugi = UserGroupInformation.createProxyUser(Proxy_User, 'nifi');
 //        	ugi = UserGroupInformation.createProxyUser(Proxy_User, UserGrnifi-extension-utilsnifi-extension-utilsoupInformation.getLoginUser());
         
         final Path path;
