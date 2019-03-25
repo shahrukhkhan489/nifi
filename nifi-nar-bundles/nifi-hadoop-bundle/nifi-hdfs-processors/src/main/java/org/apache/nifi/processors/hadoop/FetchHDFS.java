@@ -80,6 +80,16 @@ public class FetchHDFS extends AbstractHadoopProcessor {
         .addValidator(StandardValidators.ATTRIBUTE_EXPRESSION_LANGUAGE_VALIDATOR)
         .build();
 
+    static final PropertyDescriptor PROXY_USER = new PropertyDescriptor.Builder()
+        .name("Proxy User")
+        .description("A superuser with username ‘super’ wants to submit job and access hdfs on behalf of another user joe." +
+             "If the cluster is running in Secure Mode, the superuser must have kerberos credentials to be able to impersonate another user." +
+             "https://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-common/Superusers.html")
+        .required(false)
+        .addValidator(StandardValidators.NON_EMPTY_VALIDATOR)
+        .dynamicallyModifiesClasspath(true)
+        .build();  
+    
     static final Relationship REL_SUCCESS = new Relationship.Builder()
         .name("success")
         .description("FlowFiles will be routed to this relationship once they have been updated with the content of the HDFS file")
@@ -100,6 +110,7 @@ public class FetchHDFS extends AbstractHadoopProcessor {
         final List<PropertyDescriptor> props = new ArrayList<>(properties);
         props.add(FILENAME);
         props.add(COMPRESSION_CODEC);
+        props.add(PROXY_USER);
         return props;
     }
 

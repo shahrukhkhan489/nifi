@@ -154,6 +154,16 @@ public class PutHDFS extends AbstractHadoopProcessor {
             .addValidator(HadoopValidators.UMASK_VALIDATOR)
             .build();
 
+    static final PropertyDescriptor PROXY_USER = new PropertyDescriptor.Builder()
+            .name("Proxy User")
+            .description("A superuser with username ‘super’ wants to submit job and access hdfs on behalf of another user joe." +
+                 "If the cluster is running in Secure Mode, the superuser must have kerberos credentials to be able to impersonate another user." +
+                 "https://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-common/Superusers.html")
+            .required(false)
+            .addValidator(StandardValidators.NON_EMPTY_VALIDATOR)
+            .dynamicallyModifiesClasspath(true)
+            .build();
+
     public static final PropertyDescriptor REMOTE_OWNER = new PropertyDescriptor.Builder()
             .name("Remote Owner")
             .description(
@@ -199,6 +209,7 @@ public class PutHDFS extends AbstractHadoopProcessor {
         props.add(REMOTE_OWNER);
         props.add(REMOTE_GROUP);
         props.add(COMPRESSION_CODEC);
+        props.add(PROXY_USER);
         return props;
     }
 
