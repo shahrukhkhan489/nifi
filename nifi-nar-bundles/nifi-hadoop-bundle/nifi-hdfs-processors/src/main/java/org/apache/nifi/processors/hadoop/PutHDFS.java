@@ -154,15 +154,6 @@ public class PutHDFS extends AbstractHadoopProcessor {
             .addValidator(HadoopValidators.UMASK_VALIDATOR)
             .build();
 
-    static final PropertyDescriptor PROXY_USER = new PropertyDescriptor.Builder()
-            .name("Proxy User")
-            .description("A superuser with username ‘super’ wants to submit job and access hdfs on behalf of another user joe." +
-                 "If the cluster is running in Secure Mode, the superuser must have kerberos credentials to be able to impersonate another user." +
-                 "https://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-common/Superusers.html")
-            .addValidator(StandardValidators.NON_EMPTY_VALIDATOR)
-            .required(false)
-            .build();
-
     public static final PropertyDescriptor REMOTE_OWNER = new PropertyDescriptor.Builder()
             .name("Remote Owner")
             .description(
@@ -208,7 +199,6 @@ public class PutHDFS extends AbstractHadoopProcessor {
         props.add(REMOTE_OWNER);
         props.add(REMOTE_GROUP);
         props.add(COMPRESSION_CODEC);
-        props.add(PROXY_USER);
         return props;
     }
 
@@ -234,14 +224,7 @@ public class PutHDFS extends AbstractHadoopProcessor {
 
         final FileSystem hdfs = getFileSystem();
         final Configuration configuration = getConfiguration();
-        UserGroupInformation ugi = null;
-
-        String Proxy_User = context.getProperty(PROXY_USER).getValue();
-        if ( Proxy_User == null || Proxy_User.trim().equals("") )
-        	ugi = getUserGroupInformation();
-        else
-        	ugi = UserGroupInformation.createProxyUser(Proxy_User, getUserGroupInformation());
-//        	ugi = UserGroupInformation.createProxyUser(Proxy_User, UserGroupInformation.getLoginUser());
+        final UserGroupInformation ugi = getUserGroupInformation();
 
         if (configuration == null || hdfs == null || ugi == null) {
             getLogger().error("HDFS not configured properly");

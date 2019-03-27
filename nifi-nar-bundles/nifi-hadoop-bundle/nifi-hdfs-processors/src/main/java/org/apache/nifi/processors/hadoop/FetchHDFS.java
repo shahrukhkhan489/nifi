@@ -79,15 +79,6 @@ public class FetchHDFS extends AbstractHadoopProcessor {
         .defaultValue("${path}/${filename}")
         .addValidator(StandardValidators.ATTRIBUTE_EXPRESSION_LANGUAGE_VALIDATOR)
         .build();
-
-    static final PropertyDescriptor PROXY_USER = new PropertyDescriptor.Builder()
-        .name("Proxy User")
-        .description("A superuser with username ‘super’ wants to submit job and access hdfs on behalf of another user joe." +
-             "If the cluster is running in Secure Mode, the superuser must have kerberos credentials to be able to impersonate another user." +
-             "https://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-common/Superusers.html")
-        .addValidator(StandardValidators.NON_EMPTY_VALIDATOR)
-        .required(false)
-        .build();  
     
     static final Relationship REL_SUCCESS = new Relationship.Builder()
         .name("success")
@@ -109,7 +100,6 @@ public class FetchHDFS extends AbstractHadoopProcessor {
         final List<PropertyDescriptor> props = new ArrayList<>(properties);
         props.add(FILENAME);
         props.add(COMPRESSION_CODEC);
-        props.add(PROXY_USER);
         return props;
     }
 
@@ -128,18 +118,11 @@ public class FetchHDFS extends AbstractHadoopProcessor {
         if ( flowFile == null ) {
             return;
         }
-        
+
         final FileSystem hdfs = getFileSystem();
+        final UserGroupInformation ugi = getUserGroupInformation();
         final String filenameValue = context.getProperty(FILENAME).evaluateAttributeExpressions(flowFile).getValue();
 
-        UserGroupInformation ugi = null;
-        String Proxy_User = context.getProperty(PROXY_USER).getValue();
-        if ( Proxy_User == null || Proxy_User.trim().equals("") )
-        	ugi = getUserGroupInformation();
-        else
-        	ugi = UserGroupInformation.createProxyUser(Proxy_User, getUserGroupInformation());
-//        	ugi = UserGroupInformation.createProxyUser(Proxy_User, UserGrnifi-extension-utilsnifi-extension-utilsoupInformation.getLoginUser());
-        
         final Path path;
         try {
             path = new Path(filenameValue);
