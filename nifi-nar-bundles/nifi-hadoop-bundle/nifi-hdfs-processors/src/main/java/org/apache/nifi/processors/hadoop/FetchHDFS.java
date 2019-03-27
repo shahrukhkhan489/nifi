@@ -79,7 +79,7 @@ public class FetchHDFS extends AbstractHadoopProcessor {
         .defaultValue("${path}/${filename}")
         .addValidator(StandardValidators.ATTRIBUTE_EXPRESSION_LANGUAGE_VALIDATOR)
         .build();
-    
+
     static final Relationship REL_SUCCESS = new Relationship.Builder()
         .name("success")
         .description("FlowFiles will be routed to this relationship once they have been updated with the content of the HDFS file")
