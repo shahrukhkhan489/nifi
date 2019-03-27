@@ -245,16 +245,17 @@ public abstract class AbstractHadoopProcessor extends AbstractProcessor {
                 .explanation("The '" + ALLOW_EXPLICIT_KEYTAB + "' system environment variable is configured to forbid explicitly configuring principal/keytab in processors. "
                     + "The Kerberos Credentials Service should be used instead of setting the Kerberos Keytab or Kerberos Principal property.")
                 .build());
-        }
-        //Check to see if the REMOTE_USER and Kerberos are configured.
-        if(null != principal && validationContext.getProperty(REMOTE_USER).isSet()){
+        }    
 
-             results.add(new ValidationResult.Builder()
+        //Check to see if the REMOTE_USER and Kerberos are configured.
+        if(null != explicitPrincipal && validationContext.getProperty(REMOTE_USER).isSet()){
+
+            results.add(new ValidationResult.Builder()
                                 .valid(false)
                                 .subject(this.getClass().getSimpleName())
                                 .explanation("Kerberos and Remote User should not be used together.")
                                 .build());
-        }        
+        }
 
         return results;
     }
