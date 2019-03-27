@@ -127,6 +127,18 @@ public abstract class AbstractHadoopProcessor extends AbstractProcessor {
             .required(false)
             .build();
 
+    public static final PropertyDescriptor REMOTE_USER = new PropertyDescriptor.Builder()
+            .name("Remote User")
+            .description("The login name that should be used for HDFS activity, this login name must already exist in Hadoop. " +
+                         "It is not required that the login name specified with this property has super user privileges. This property does not apply and will be ignoreed " +
+                         "when accessing HDFS with kerberos as all HDFS activity will be done using the kerberos principal. " +
+                         "This property is also not the same as using a Proxy User, whereby the user doing the proxying" +
+                         "needs to have super user privileges as documented here: https://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-common/Superusers.html.")
+            .addValidator(StandardValidators.NON_EMPTY_VALIDATOR)
+            .expressionLanguageSupported(true)
+            .build();
+    
+    
     public static final String ABSOLUTE_HDFS_PATH_ATTRIBUTE = "absolute.hdfs.path";
 
     private static final Object RESOURCES_LOCK = new Object();
@@ -156,6 +168,7 @@ public abstract class AbstractHadoopProcessor extends AbstractProcessor {
         props.add(kerberosProperties.getKerberosKeytab());
         props.add(KERBEROS_RELOGIN_PERIOD);
         props.add(ADDITIONAL_CLASSPATH_RESOURCES);
+        props.add(REMOTE_USER);
         properties = Collections.unmodifiableList(props);
     }
 
@@ -233,6 +246,15 @@ public abstract class AbstractHadoopProcessor extends AbstractProcessor {
                     + "The Kerberos Credentials Service should be used instead of setting the Kerberos Keytab or Kerberos Principal property.")
                 .build());
         }
+        //Check to see if the REMOTE_USER and Kerberos are configured.
+        if(null != principal && validationContext.getProperty(REMOTE_USER).isSet()){
+
+             results.add(new ValidationResult.Builder()
+                                .valid(false)
+                                .subject(this.getClass().getSimpleName())
+                                .explanation("Kerberos and Remote User should not be used together.")
+                                .build());
+        }        
 
         return results;
     }
@@ -247,8 +269,12 @@ public abstract class AbstractHadoopProcessor extends AbstractProcessor {
             // properties this processor sets. TODO: re-work ListHDFS to utilize Kerberos
             HdfsResources resources = hdfsResources.get();
             if (resources.getConfiguration() == null) {
+//                final String configResources = context.getProperty(HADOOP_CONFIGURATION_RESOURCES).evaluateAttributeExpressions().getValue();
                 final String configResources = context.getProperty(HADOOP_CONFIGURATION_RESOURCES).evaluateAttributeExpressions().getValue();
-                resources = resetHDFSResources(configResources, context);
+                if(null != configResources) {
+                    getLogger().debug("Setting HDF Resources using the following config: ", new Object[]{configResources});
+                }
+            	resources = resetHDFSResources(configResources, context);
                 hdfsResources.set(resources);
             }
         } catch (Exception ex) {
@@ -389,7 +415,12 @@ public abstract class AbstractHadoopProcessor extends AbstractProcessor {
             } else {
                 config.set("ipc.client.fallback-to-simple-auth-allowed", "true");
                 config.set("hadoop.security.authentication", "simple");
-                ugi = SecurityUtil.loginSimple(config);
+//                ugi = SecurityUtil.loginSimple(config);
+                if (context.getProperty(REMOTE_USER).isSet()) {
+                    ugi = UserGroupInformation.createRemoteUser(context.getProperty(REMOTE_USER).evaluateAttributeExpressions().getValue());
+                } else {
+                    ugi = SecurityUtil.loginSimple(config);
+                }          
                 fs = getFileSystemAsUser(config, ugi);
             }
         }
