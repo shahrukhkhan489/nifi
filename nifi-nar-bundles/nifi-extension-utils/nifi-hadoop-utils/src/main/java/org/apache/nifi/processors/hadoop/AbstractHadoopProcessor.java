@@ -134,8 +134,8 @@ public abstract class AbstractHadoopProcessor extends AbstractProcessor {
                          "when accessing HDFS with kerberos as all HDFS activity will be done using the kerberos principal. " +
                          "This property is also not the same as using a Proxy User, whereby the user doing the proxying" +
                          "needs to have super user privileges as documented here: https://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-common/Superusers.html.")
-            .addValidator(StandardValidators.NON_EMPTY_VALIDATOR)
-            .expressionLanguageSupported(true)
+            .expressionLanguageSupported(ExpressionLanguageScope.FLOWFILE_ATTRIBUTES)
+            .addValidator(StandardValidators.ATTRIBUTE_EXPRESSION_LANGUAGE_VALIDATOR)
             .build();
 
     public static final String ABSOLUTE_HDFS_PATH_ATTRIBUTE = "absolute.hdfs.path";
