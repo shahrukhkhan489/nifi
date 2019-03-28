@@ -118,7 +118,7 @@ public abstract class AbstractHadoopProcessor extends AbstractProcessor {
             .addValidator(StandardValidators.NON_EMPTY_VALIDATOR)
             .dynamicallyModifiesClasspath(true)
             .build();
- 
+
     static final PropertyDescriptor KERBEROS_CREDENTIALS_SERVICE = new PropertyDescriptor.Builder()
             .name("kerberos-credentials-service")
             .displayName("Kerberos Credentials Service")
@@ -137,8 +137,7 @@ public abstract class AbstractHadoopProcessor extends AbstractProcessor {
             .addValidator(StandardValidators.NON_EMPTY_VALIDATOR)
             .expressionLanguageSupported(true)
             .build();
-    
-    
+
     public static final String ABSOLUTE_HDFS_PATH_ATTRIBUTE = "absolute.hdfs.path";
 
     private static final Object RESOURCES_LOCK = new Object();
@@ -274,7 +273,7 @@ public abstract class AbstractHadoopProcessor extends AbstractProcessor {
                 if(null != configResources) {
                     getLogger().debug("Setting HDF Resources using the following config: ", new Object[]{configResources});
                 }
-            	resources = resetHDFSResources(configResources, context);
+                resources = resetHDFSResources(configResources, context);
                 hdfsResources.set(resources);
             }
         } catch (Exception ex) {
