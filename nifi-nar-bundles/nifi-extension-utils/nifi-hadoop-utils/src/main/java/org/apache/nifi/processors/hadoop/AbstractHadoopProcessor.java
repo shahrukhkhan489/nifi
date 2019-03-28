@@ -248,7 +248,9 @@ public abstract class AbstractHadoopProcessor extends AbstractProcessor {
         }    
 
         //Check to see if the REMOTE_USER and Kerberos are configured.
-        if(null != explicitPrincipal && validationContext.getProperty(REMOTE_USER).isSet()){
+        final String remote_user = context.getProperty(REMOTE_USER).evaluateAttributeExpressions().getValue();
+        
+        if(null != explicitPrincipal && remote_user != null ){
 
             results.add(new ValidationResult.Builder()
                                 .valid(false)
@@ -417,8 +419,9 @@ public abstract class AbstractHadoopProcessor extends AbstractProcessor {
                 config.set("ipc.client.fallback-to-simple-auth-allowed", "true");
                 config.set("hadoop.security.authentication", "simple");
 //                ugi = SecurityUtil.loginSimple(config);
-                if (context.getProperty(REMOTE_USER).isSet()) {
-                    ugi = UserGroupInformation.createRemoteUser(context.getProperty(REMOTE_USER).evaluateAttributeExpressions().getValue());
+                final String remote_user = context.getProperty(REMOTE_USER).evaluateAttributeExpressions().getValue();
+                if ( remote_user != null ) {
+                    ugi = UserGroupInformation.createRemoteUser(remote_user);
                 } else {
                     ugi = SecurityUtil.loginSimple(config);
                 }          
