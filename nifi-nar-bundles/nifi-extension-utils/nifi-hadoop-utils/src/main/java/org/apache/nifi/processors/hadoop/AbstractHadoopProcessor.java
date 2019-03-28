@@ -416,7 +416,8 @@ public abstract class AbstractHadoopProcessor extends AbstractProcessor {
                 config.set("hadoop.security.authentication", "simple");
 
                 String remote_user = context.getProperty(REMOTE_USER).evaluateAttributeExpressions().getValue();
-                if ( remote_user != null ) {
+                String empty=null;
+                if ( !(remote_user.equals(empty))  ) {
                     ugi = UserGroupInformation.createRemoteUser(remote_user);
                 } else {
                     ugi = SecurityUtil.loginSimple(config);
