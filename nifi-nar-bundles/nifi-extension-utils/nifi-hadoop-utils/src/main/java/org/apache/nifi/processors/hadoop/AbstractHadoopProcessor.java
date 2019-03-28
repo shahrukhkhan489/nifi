@@ -402,8 +402,7 @@ public abstract class AbstractHadoopProcessor extends AbstractProcessor {
             if (SecurityUtil.isSecurityEnabled(config)) {
                 String principal = context.getProperty(kerberosProperties.getKerberosPrincipal()).evaluateAttributeExpressions().getValue();
                 String keyTab = context.getProperty(kerberosProperties.getKerberosKeytab()).evaluateAttributeExpressions().getValue();
-                String remote_user = context.getProperty(REMOTE_USER).evaluateAttributeExpressions().getValue();
-                
+               
                 // If the Kerberos Credentials Service is specified, we need to use its configuration, not the explicit properties for principal/keytab.
                 // The customValidate method ensures that only one can be set, so we know that the principal & keytab above are null.
                 final KerberosCredentialsService credentialsService = context.getProperty(KERBEROS_CREDENTIALS_SERVICE).asControllerService(KerberosCredentialsService.class);
@@ -418,6 +417,8 @@ public abstract class AbstractHadoopProcessor extends AbstractProcessor {
                 config.set("ipc.client.fallback-to-simple-auth-allowed", "true");
                 config.set("hadoop.security.authentication", "simple");
 //                ugi = SecurityUtil.loginSimple(config);
+                
+                String remote_user = context.getProperty(REMOTE_USER).evaluateAttributeExpressions().getValue();
                 if ( remote_user != null ) {
                     ugi = UserGroupInformation.createRemoteUser(remote_user);
                 } else {
