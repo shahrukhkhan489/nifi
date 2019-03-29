@@ -637,7 +637,7 @@ public abstract class AbstractHadoopProcessor extends AbstractProcessor {
 
         public UserGroupInformation getUserGroupInformation(final ProcessContext context, final ProcessSession session) {
         	final String configResources = context.getProperty(HADOOP_CONFIGURATION_RESOURCES).evaluateAttributeExpressions().getValue();
-        	final HdfsResources resources = resetHDFSResourceremoteuser(configResources, context, session);
+        	HdfsResources resources = resetHDFSResourceremoteuser(configResources, context, session);
         	
         	hdfsResources.set(resources);
             return userGroupInformation;
