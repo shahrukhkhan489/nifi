@@ -613,7 +613,7 @@ public abstract class AbstractHadoopProcessor extends AbstractProcessor {
     }
 
     protected UserGroupInformation getUserGroupInformation(ProcessContext context, ProcessSession session) {
-        return hdfsResources.get().getUserGroupInformation(session);
+        return hdfsResources.get().getUserGroupInformation(context, session);
     }
 
     static protected class HdfsResources {
