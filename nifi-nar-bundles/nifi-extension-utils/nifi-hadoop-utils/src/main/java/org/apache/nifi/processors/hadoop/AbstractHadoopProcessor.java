@@ -612,7 +612,7 @@ public abstract class AbstractHadoopProcessor extends AbstractProcessor {
         return hdfsResources.get().getFileSystem();
     }
 
-    protected UserGroupInformation getUserGroupInformation(final ProcessContext context, final ProcessSession session) {
+    protected UserGroupInformation getUserGroupInformation(ProcessContext context, ProcessSession session) {
         return hdfsResources.get().getUserGroupInformation(context, session);
     }
 
@@ -635,8 +635,8 @@ public abstract class AbstractHadoopProcessor extends AbstractProcessor {
             return fileSystem;
         }
 
-        public UserGroupInformation getUserGroupInformation(final ProcessContext context, final ProcessSession session) {
-        	final String configResources = context.getProperty(HADOOP_CONFIGURATION_RESOURCES).evaluateAttributeExpressions().getValue();
+        public UserGroupInformation getUserGroupInformation(ProcessContext context, ProcessSession session) {
+        	String configResources = context.getProperty(HADOOP_CONFIGURATION_RESOURCES).evaluateAttributeExpressions().getValue();
         	HdfsResources resources = resetHDFSResourceremoteuser(configResources, context, session);
         	
         	hdfsResources.set(resources);
