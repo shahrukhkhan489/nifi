@@ -120,7 +120,8 @@ public class FetchHDFS extends AbstractHadoopProcessor {
         }
 
         final FileSystem hdfs = getFileSystem();
-        final UserGroupInformation ugi = getUserGroupInformation(session);
+//        final UserGroupInformation ugi = getUserGroupInformation();
+        final UserGroupInformation ugi = getUserGroupInformation(context, session);
         final String filenameValue = context.getProperty(FILENAME).evaluateAttributeExpressions(flowFile).getValue();
 
         final Path path;
