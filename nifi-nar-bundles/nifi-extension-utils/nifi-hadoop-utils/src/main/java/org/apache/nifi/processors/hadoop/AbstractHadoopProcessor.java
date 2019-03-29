@@ -38,6 +38,7 @@ import org.apache.nifi.kerberos.KerberosCredentialsService;
 import org.apache.nifi.logging.ComponentLog;
 import org.apache.nifi.processor.AbstractProcessor;
 import org.apache.nifi.processor.ProcessContext;
+import org.apache.nifi.processor.ProcessSession;
 import org.apache.nifi.processor.ProcessorInitializationContext;
 import org.apache.nifi.processor.util.StandardValidators;
 
@@ -416,7 +417,7 @@ public abstract class AbstractHadoopProcessor extends AbstractProcessor {
                 config.set("hadoop.security.authentication", "simple");
 
                 String remote_user = context.getProperty(REMOTE_USER).evaluateAttributeExpressions().getValue();
-
+//                remote_user != null
                 if ( context.getProperty(REMOTE_USER).isSet() && !remote_user.equals("")  ) {
                     ugi = UserGroupInformation.createRemoteUser(remote_user);
                 } else {
@@ -434,6 +435,67 @@ public abstract class AbstractHadoopProcessor extends AbstractProcessor {
         return new HdfsResources(config, fs, ugi);
     }
 
+    HdfsResources resetHDFSResourceremoteuser(String configResources, ProcessContext context, ProcessSession session) throws IOException {
+        FlowFile flowFile = session.get();
+        Configuration config = new ExtendedConfiguration(getLogger());
+        config.setClassLoader(Thread.currentThread().getContextClassLoader());
+
+        // getConfigurationFromResources(config, configResources);
+
+        // // give sub-classes a chance to process configuration
+        // preProcessConfiguration(config, context);
+
+        // // first check for timeout on HDFS connection, because FileSystem has a hard coded 15 minute timeout
+        // checkHdfsUriForTimeout(config);
+
+        // // disable caching of Configuration and FileSystem objects, else we cannot reconfigure the processor without a complete
+        // // 
+
+        String disableCacheName = String.format("fs.%s.impl.disable.cache", FileSystem.getDefaultUri(config).getScheme());
+        config.set(disableCacheName, "true");
+
+        // If kerberos is enabled, create the file system as the kerberos principal
+        // -- use RESOURCE_LOCK to guarantee UserGroupInformation is accessed by only a single thread at at time
+        FileSystem fs;
+        UserGroupInformation ugi;
+        synchronized (RESOURCES_LOCK) {
+            if (SecurityUtil.isSecurityEnabled(config)) {
+                String principal = context.getProperty(kerberosProperties.getKerberosPrincipal()).evaluateAttributeExpressions().getValue();
+                String keyTab = context.getProperty(kerberosProperties.getKerberosKeytab()).evaluateAttributeExpressions().getValue();
+
+                // If the Kerberos Credentials Service is specified, we need to use its configuration, not the explicit properties for principal/keytab.
+                // The customValidate method ensures that only one can be set, so we know that the principal & keytab above are null.
+                final KerberosCredentialsService credentialsService = context.getProperty(KERBEROS_CREDENTIALS_SERVICE).asControllerService(KerberosCredentialsService.class);
+                if (credentialsService != null) {
+                    principal = credentialsService.getPrincipal();
+                    keyTab = credentialsService.getKeytab();
+                }
+
+                ugi = SecurityUtil.loginKerberos(config, principal, keyTab);
+                fs = getFileSystemAsUser(config, ugi);
+            } else {
+                config.set("ipc.client.fallback-to-simple-auth-allowed", "true");
+                config.set("hadoop.security.authentication", "simple");
+
+                String remote_user = context.getProperty(REMOTE_USER).evaluateAttributeExpressions(flowFile).getValue();
+//                remote_user != null
+                if ( context.getProperty(REMOTE_USER).isSet() && !remote_user.equals("")  ) {
+                    ugi = UserGroupInformation.createRemoteUser(remote_user);
+                } else {
+                    ugi = SecurityUtil.loginSimple(config);
+                }
+                fs = getFileSystemAsUser(config, ugi);
+            }
+        }
+        getLogger().debug("resetHDFSResources UGI {}", new Object[]{ugi});
+
+        final Path workingDir = fs.getWorkingDirectory();
+        getLogger().info("Initialized a new HDFS File System with working dir: {} default block size: {} default replication: {} config: {}",
+                new Object[]{workingDir, fs.getDefaultBlockSize(workingDir), fs.getDefaultReplication(workingDir), config.toString()});
+
+        return new HdfsResources(config, fs, ugi);
+    }    
+    
     /**
      * This method will be called after the Configuration has been created, but before the FileSystem is created,
      * allowing sub-classes to take further action on the Configuration before creating the FileSystem.
@@ -549,8 +611,8 @@ public abstract class AbstractHadoopProcessor extends AbstractProcessor {
         return hdfsResources.get().getFileSystem();
     }
 
-    protected UserGroupInformation getUserGroupInformation() {
-        return hdfsResources.get().getUserGroupInformation();
+    protected UserGroupInformation getUserGroupInformation(ProcessSession session) {
+        return hdfsResources.get().getUserGroupInformation(session);
     }
 
     static protected class HdfsResources {
@@ -572,7 +634,10 @@ public abstract class AbstractHadoopProcessor extends AbstractProcessor {
             return fileSystem;
         }
 
-        public UserGroupInformation getUserGroupInformation() {
+        public UserGroupInformation getUserGroupInformation(ProcessSession session) {
+        	final String configResources = context.getProperty(HADOOP_CONFIGURATION_RESOURCES).evaluateAttributeExpressions().getValue();
+        	HdfsResources resources = resetHDFSResourceremoteuser(configResources, context, session);
+        	hdfsResources.set(resources);
             return userGroupInformation;
         }
     }
