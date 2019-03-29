@@ -436,7 +436,7 @@ public abstract class AbstractHadoopProcessor extends AbstractProcessor {
         return new HdfsResources(config, fs, ugi);
     }
 
-    HdfsResources resetHDFSResourceremoteuser(String configResources, ProcessContext context, ProcessSession session) throws IOException {
+    HdfsResources resetHDFSResourceremoteuser(String configResources, ProcessContext context, final ProcessSession session) throws IOException {
         FlowFile flowFile = session.get();
         Configuration config = new ExtendedConfiguration(getLogger());
         config.setClassLoader(Thread.currentThread().getContextClassLoader());
@@ -612,7 +612,7 @@ public abstract class AbstractHadoopProcessor extends AbstractProcessor {
         return hdfsResources.get().getFileSystem();
     }
 
-    protected UserGroupInformation getUserGroupInformation(ProcessContext context, ProcessSession session) {
+    protected UserGroupInformation getUserGroupInformation(final ProcessContext context, final ProcessSession session) {
         return hdfsResources.get().getUserGroupInformation(context, session);
     }
 
@@ -635,9 +635,9 @@ public abstract class AbstractHadoopProcessor extends AbstractProcessor {
             return fileSystem;
         }
 
-        public UserGroupInformation getUserGroupInformation(ProcessContext context, ProcessSession session) {
-        	String configResources = context.getProperty(HADOOP_CONFIGURATION_RESOURCES).evaluateAttributeExpressions().getValue();
-        	HdfsResources resources = resetHDFSResourceremoteuser(configResources, context, session);
+        public UserGroupInformation getUserGroupInformation(final ProcessContext context, final ProcessSession session) {
+        	final String configResources = context.getProperty(HADOOP_CONFIGURATION_RESOURCES).evaluateAttributeExpressions().getValue();
+        	final HdfsResources resources = resetHDFSResourceremoteuser(configResources, context, session);
         	hdfsResources.set(resources);
             return userGroupInformation;
         }
