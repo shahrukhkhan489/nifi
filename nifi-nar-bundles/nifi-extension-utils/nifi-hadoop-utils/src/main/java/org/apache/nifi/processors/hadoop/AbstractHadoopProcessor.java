@@ -491,11 +491,11 @@ public abstract class AbstractHadoopProcessor extends AbstractProcessor {
 
                 String remote_user = context.getProperty(REMOTE_USER).evaluateAttributeExpressions(flowFile).getValue();
 
-                if ( context.getProperty(REMOTE_USER).isSet() && !remote_user.equals("")  ) {
+//                if ( context.getProperty(REMOTE_USER).isSet() && !remote_user.equals("")  ) {
                     ugi = UserGroupInformation.createRemoteUser(remote_user);
-                } else {
-                    ugi = SecurityUtil.loginSimple(config);
-                }
+//                } else {
+//                    ugi = SecurityUtil.loginSimple(config);
+//                }
                 fs = getFileSystemAsUser(config, ugi);
             }
         }
