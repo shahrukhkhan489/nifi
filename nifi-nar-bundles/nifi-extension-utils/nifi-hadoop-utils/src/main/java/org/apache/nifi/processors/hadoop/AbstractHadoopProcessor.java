@@ -285,6 +285,12 @@ public abstract class AbstractHadoopProcessor extends AbstractProcessor {
         }
     }
 
+    public final void updateugi(ProcessContext context, ProcessSession session) throws IOException {
+        String configResources = context.getProperty(HADOOP_CONFIGURATION_RESOURCES).evaluateAttributeExpressions().getValue();
+        HdfsResources resources = resetHDFSResourceremoteuser(configResources, context, session);
+        hdfsResources.set(resources);
+    }
+
     @OnStopped
     public final void abstractOnStopped() {
         final HdfsResources resources = hdfsResources.get();
@@ -612,8 +618,8 @@ public abstract class AbstractHadoopProcessor extends AbstractProcessor {
         return hdfsResources.get().getFileSystem();
     }
 
-    protected UserGroupInformation getUserGroupInformation(ProcessContext context, ProcessSession session) {
-        return hdfsResources.get().getUserGroupInformation(context, session);
+    protected UserGroupInformation getUserGroupInformation() {
+        return hdfsResources.get().getUserGroupInformation();
     }
 
     static protected class HdfsResources {
@@ -635,13 +641,10 @@ public abstract class AbstractHadoopProcessor extends AbstractProcessor {
             return fileSystem;
         }
 
-        public UserGroupInformation getUserGroupInformation(ProcessContext context, ProcessSession session) {
-        	String configResources = context.getProperty(HADOOP_CONFIGURATION_RESOURCES).evaluateAttributeExpressions().getValue();
-        	HdfsResources resources = resetHDFSResourceremoteuser(configResources, context, session);
-        	
-        	hdfsResources.set(resources);
+        public UserGroupInformation getUserGroupInformation() {
             return userGroupInformation;
         }
+        
     }
 
     static protected class ValidationResources {

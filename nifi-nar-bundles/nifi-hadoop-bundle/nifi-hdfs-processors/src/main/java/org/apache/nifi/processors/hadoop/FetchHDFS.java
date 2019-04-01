@@ -118,10 +118,15 @@ public class FetchHDFS extends AbstractHadoopProcessor {
         if ( flowFile == null ) {
             return;
         }
+        
+        String remote_user = context.getProperty(REMOTE_USER).evaluateAttributeExpressions(flowFile).getValue();
+        if ( context.getProperty(REMOTE_USER).isSet() && !remote_user.equals("")  ) {
+        	updateugi(ProcessContext context, ProcessSession session)
+        }
 
         final FileSystem hdfs = getFileSystem();
-//        final UserGroupInformation ugi = getUserGroupInformation();
-        final UserGroupInformation ugi = getUserGroupInformation(context, session);
+        final UserGroupInformation ugi = getUserGroupInformation();
+        
         final String filenameValue = context.getProperty(FILENAME).evaluateAttributeExpressions(flowFile).getValue();
 
         final Path path;
