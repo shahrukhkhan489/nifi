@@ -121,18 +121,14 @@ public class FetchHDFS extends AbstractHadoopProcessor {
         
         String remote_user = context.getProperty(REMOTE_USER).evaluateAttributeExpressions(flowFile).getValue();
         if ( context.getProperty(REMOTE_USER).isSet() && !remote_user.equals("")  ) {
-            try {
-            	updateugi(context, session);
-            } catch (IllegalArgumentException e) {
-                getLogger().error("Failed to update UGI Object as per Remote User mentioned in FlowFile");
-                flowFile = session.putAttribute(flowFile, "hdfs.failure.reason", e.getMessage());
-                flowFile = session.penalize(flowFile);
-                session.transfer(flowFile, REL_FAILURE);
-                return;
-            }        	
-        
+        	try {
+        			updateugi(context, session);
+        		}
+        	catch(IOException e) {
+        		  e.printStackTrace();
+        		}
         }
-
+        
         final FileSystem hdfs = getFileSystem();
         final UserGroupInformation ugi = getUserGroupInformation();
         
