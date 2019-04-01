@@ -294,6 +294,7 @@ public abstract class AbstractHadoopProcessor extends AbstractProcessor {
                 }
                 resources = resetHDFSResourceremoteuser(configResources, context, session);
                 hdfsResources.set(resources);
+            }
     }
 
     @OnStopped
