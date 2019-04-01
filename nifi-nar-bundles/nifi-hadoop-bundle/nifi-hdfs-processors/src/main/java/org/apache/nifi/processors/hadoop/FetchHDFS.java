@@ -121,8 +121,8 @@ public class FetchHDFS extends AbstractHadoopProcessor {
         
         String remote_user = context.getProperty(REMOTE_USER).evaluateAttributeExpressions(flowFile).getValue();
         getLogger().info("Remote User Conifgured - " + remote_user + " User");
-        session.transfer(flowFile, REL_FAILURE);
-        context.yield();
+        session.transfer(flowFile, REL_SUCCESS);
+        
         if ( context.getProperty(REMOTE_USER).isSet() && !remote_user.equals("")  ) {
         	try {
         		updateugi(context, session);
