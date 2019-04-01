@@ -223,7 +223,7 @@ public class PutHDFS extends AbstractHadoopProcessor {
         }
         
         String remote_user = context.getProperty(REMOTE_USER).evaluateAttributeExpressions(flowFile).getValue();
-//        getLogger().info("Remote User Conifgured - " + remote_user + " User");
+        getLogger().info("Remote User Conifgured - " + remote_user + " User");
 //        session.transfer(flowFile, REL_SUCCESS);
         
         if ( context.getProperty(REMOTE_USER).isSet() && !remote_user.equals("")  ) {
