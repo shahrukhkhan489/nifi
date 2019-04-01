@@ -129,7 +129,6 @@ public class FetchHDFS extends AbstractHadoopProcessor {
         	}
         	catch (Exception ex) {
                 getLogger().error("HDFS Configuration error - {}", new Object[] { ex });
-                hdfsResources.set(new HdfsResources(null, null, null));
                 throw ex;
             }
         }
