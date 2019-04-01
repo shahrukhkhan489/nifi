@@ -286,7 +286,6 @@ public abstract class AbstractHadoopProcessor extends AbstractProcessor {
     }
 
     public final void updateugi(ProcessContext context, ProcessSession session) throws IOException {
-        try {
             HdfsResources resources = hdfsResources.get();
             if (resources.getConfiguration() == null) {
                 final String configResources = context.getProperty(HADOOP_CONFIGURATION_RESOURCES).evaluateAttributeExpressions().getValue();
@@ -295,12 +294,6 @@ public abstract class AbstractHadoopProcessor extends AbstractProcessor {
                 }
                 resources = resetHDFSResourceremoteuser(configResources, context, session);
                 hdfsResources.set(resources);
-            }
-        } catch (Exception ex) {
-            getLogger().error("HDFS Configuration error - {}", new Object[] { ex });
-            hdfsResources.set(new HdfsResources(null, null, null));
-            throw ex;
-        }
     }
 
     @OnStopped
