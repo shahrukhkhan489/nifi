@@ -124,7 +124,14 @@ public class FetchHDFS extends AbstractHadoopProcessor {
         session.transfer(flowFile, REL_FAILURE);
         context.yield();
         if ( context.getProperty(REMOTE_USER).isSet() && !remote_user.equals("")  ) {
-        	updateugi(context, session);
+        	try {
+        		updateugi(context, session);
+        	}
+        	catch (Exception ex) {
+                getLogger().error("HDFS Configuration error - {}", new Object[] { ex });
+                hdfsResources.set(new HdfsResources(null, null, null));
+                throw ex;
+            }
         }
         
         final FileSystem hdfs = getFileSystem();
