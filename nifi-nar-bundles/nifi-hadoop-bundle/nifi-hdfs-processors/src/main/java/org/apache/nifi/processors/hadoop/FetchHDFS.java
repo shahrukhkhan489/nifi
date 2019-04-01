@@ -125,7 +125,7 @@ public class FetchHDFS extends AbstractHadoopProcessor {
             	updateugi(context, session);
             } catch (IllegalArgumentException e) {
                 getLogger().error("Failed to update UGI Object as per Remote User mentioned in FlowFile");
-                flowFile = session.putAttribute(flowFile, e.getMessage());
+                flowFile = session.putAttribute(flowFile, "hdfs.remoteuser.reason", e.getMessage());
                 flowFile = session.penalize(flowFile);
                 session.transfer(flowFile, REL_FAILURE);
                 return;
