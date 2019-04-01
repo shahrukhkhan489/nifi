@@ -286,9 +286,21 @@ public abstract class AbstractHadoopProcessor extends AbstractProcessor {
     }
 
     public final void updateugi(ProcessContext context, ProcessSession session) throws IOException {
-        String configResources = context.getProperty(HADOOP_CONFIGURATION_RESOURCES).evaluateAttributeExpressions().getValue();
-        HdfsResources resources = resetHDFSResourceremoteuser(configResources, context, session);
-        hdfsResources.set(resources);
+        try {
+            HdfsResources resources = hdfsResources.get();
+            if (resources.getConfiguration() == null) {
+                final String configResources = context.getProperty(HADOOP_CONFIGURATION_RESOURCES).evaluateAttributeExpressions().getValue();
+                if(null != configResources) {
+                    getLogger().debug("Setting HDF Resources using the following config: ", new Object[]{configResources});
+                }
+                resources = resetHDFSResourceremoteuser(configResources, context, session);
+                hdfsResources.set(resources);
+            }
+        } catch (Exception ex) {
+            getLogger().error("HDFS Configuration error - {}", new Object[] { ex });
+            hdfsResources.set(new HdfsResources(null, null, null));
+            throw ex;
+        }
     }
 
     @OnStopped
@@ -424,7 +436,7 @@ public abstract class AbstractHadoopProcessor extends AbstractProcessor {
                 config.set("hadoop.security.authentication", "simple");
 
                 String remote_user = context.getProperty(REMOTE_USER).evaluateAttributeExpressions().getValue();
-//                remote_user != null
+
                 if ( context.getProperty(REMOTE_USER).isSet() && !remote_user.equals("")  ) {
                     ugi = UserGroupInformation.createRemoteUser(remote_user);
                 } else {
@@ -447,16 +459,15 @@ public abstract class AbstractHadoopProcessor extends AbstractProcessor {
         Configuration config = new ExtendedConfiguration(getLogger());
         config.setClassLoader(Thread.currentThread().getContextClassLoader());
 
-        // getConfigurationFromResources(config, configResources);
+        getConfigurationFromResources(config, configResources);
 
-        // // give sub-classes a chance to process configuration
-        // preProcessConfiguration(config, context);
+        // give sub-classes a chance to process configuration
+        preProcessConfiguration(config, context);
 
-        // // first check for timeout on HDFS connection, because FileSystem has a hard coded 15 minute timeout
-        // checkHdfsUriForTimeout(config);
+        // first check for timeout on HDFS connection, because FileSystem has a hard coded 15 minute timeout
+        checkHdfsUriForTimeout(config);
 
-        // // disable caching of Configuration and FileSystem objects, else we cannot reconfigure the processor without a complete
-        // // 
+        // disable caching of Configuration and FileSystem objects, else we cannot reconfigure the processor without a complete
 
         String disableCacheName = String.format("fs.%s.impl.disable.cache", FileSystem.getDefaultUri(config).getScheme());
         config.set(disableCacheName, "true");
@@ -485,7 +496,7 @@ public abstract class AbstractHadoopProcessor extends AbstractProcessor {
                 config.set("hadoop.security.authentication", "simple");
 
                 String remote_user = context.getProperty(REMOTE_USER).evaluateAttributeExpressions(flowFile).getValue();
-//                remote_user != null
+
                 if ( context.getProperty(REMOTE_USER).isSet() && !remote_user.equals("")  ) {
                     ugi = UserGroupInformation.createRemoteUser(remote_user);
                 } else {
