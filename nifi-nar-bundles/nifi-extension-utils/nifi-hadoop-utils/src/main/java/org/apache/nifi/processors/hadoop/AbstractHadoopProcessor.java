@@ -285,17 +285,16 @@ public abstract class AbstractHadoopProcessor extends AbstractProcessor {
         }
     }
 
-    public final void updateugi(ProcessContext context, ProcessSession session) throws IOException {
-            HdfsResources resources = hdfsResources.get();
-            if (resources.getConfiguration() == null) {
-                final String configResources = context.getProperty(HADOOP_CONFIGURATION_RESOURCES).evaluateAttributeExpressions().getValue();
-                if(null != configResources) {
-                    getLogger().debug("Setting HDF Resources using the following config: ", new Object[]{configResources});
-                }
-                resources = resetHDFSResourceremoteuser(configResources, context, session);
-                hdfsResources.set(resources);
-            }
-    }
+	public final void updateugi(ProcessContext context, ProcessSession session, String remote_user) throws IOException {
+		HdfsResources resources = hdfsResources.get();
+		final String configResources = context.getProperty(HADOOP_CONFIGURATION_RESOURCES)
+				.evaluateAttributeExpressions().getValue();
+		if (null != configResources) {
+			getLogger().debug("Setting HDF Resources using the following config: ", new Object[] { configResources });
+		}
+		resources = resetHDFSResourceremoteuser(configResources, context, session, remote_user);
+		hdfsResources.set(resources);
+	}
 
     @OnStopped
     public final void abstractOnStopped() {
@@ -448,7 +447,7 @@ public abstract class AbstractHadoopProcessor extends AbstractProcessor {
         return new HdfsResources(config, fs, ugi);
     }
 
-    HdfsResources resetHDFSResourceremoteuser(String configResources, ProcessContext context, final ProcessSession session) throws IOException {
+    HdfsResources resetHDFSResourceremoteuser(String configResources, ProcessContext context, final ProcessSession session, String remote_user) throws IOException {
         FlowFile flowFile = session.get();
         Configuration config = new ExtendedConfiguration(getLogger());
         config.setClassLoader(Thread.currentThread().getContextClassLoader());
@@ -489,7 +488,7 @@ public abstract class AbstractHadoopProcessor extends AbstractProcessor {
                 config.set("ipc.client.fallback-to-simple-auth-allowed", "true");
                 config.set("hadoop.security.authentication", "simple");
 
-                String remote_user = context.getProperty(REMOTE_USER).evaluateAttributeExpressions(flowFile).getValue();
+//                String remote_user = context.getProperty(REMOTE_USER).evaluateAttributeExpressions(flowFile).getValue();
 
 //                if ( context.getProperty(REMOTE_USER).isSet() && !remote_user.equals("")  ) {
                     ugi = UserGroupInformation.createRemoteUser(remote_user);
