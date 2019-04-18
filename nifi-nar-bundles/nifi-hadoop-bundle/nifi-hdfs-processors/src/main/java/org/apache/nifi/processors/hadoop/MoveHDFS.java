@@ -238,6 +238,15 @@ public class MoveHDFS extends AbstractHadoopProcessor {
             return;
         }
 
+        try {
+        	updateugi(context, session);
+        }
+        catch (Exception ex) {
+                getLogger().error("HDFS Configuration error - {}", new Object[] { ex });
+                session.transfer(flowFile, REL_FAILURE);
+                context.yield();
+        }            
+            
         flowFile = (flowFile != null) ? flowFile : session.create();
 
         final FileSystem hdfs = getFileSystem();
