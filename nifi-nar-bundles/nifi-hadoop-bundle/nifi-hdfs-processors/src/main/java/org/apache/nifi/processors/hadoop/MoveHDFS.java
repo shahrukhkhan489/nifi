@@ -238,6 +238,20 @@ public class MoveHDFS extends AbstractHadoopProcessor {
             return;
         }
 
+        String remote_user = context.getProperty(REMOTE_USER).evaluateAttributeExpressions(flowFile).getValue();
+        getLogger().info("Remote User Conifgured - " + remote_user + " User");
+
+         if ( context.getProperty(REMOTE_USER).isSet() && !remote_user.equals("")  ) {
+        	try {
+        		updateugi(context, session, remote_user);
+        	}
+        	catch (Exception ex) {
+                getLogger().error("HDFS Configuration error - {}", new Object[] { ex });
+                session.transfer(flowFile, REL_FAILURE);
+                context.yield();
+            }
+        }            
+
         flowFile = (flowFile != null) ? flowFile : session.create();
 
         final FileSystem hdfs = getFileSystem();
